@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swad AI Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: white; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        .card { background: #181818; padding: 30px; border-radius: 20px; width: 100%; max-width: 500px; border: 1px solid #333; }
+        h1 { color: #ff5722; letter-spacing: 2px; }
+        .status-box { padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8em; text-align: center; background: #222; border: 1px solid #444; }
+        button { background: #ff5722; color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1em; }
+        input[type="file"] { background: #222; padding: 10px; width: 100%; border-radius: 10px; margin: 15px 0; box-sizing: border-box; }
+        #result { margin-top: 25px; display: none; padding: 20px; background: #222; border-radius: 15px; text-align: center; }
+        .error { color: #ff5252; border-color: #ff5252; background: rgba(255,82,82,0.1); }
+        .success { color: #4caf50; border-color: #4caf50; background: rgba(76,175,80,0.1); }
+    </style>
+</head>
+<body>
+    <h1>SWAD AI DASHBOARD</h1>
+    <div class="card">
+        <div id="connectionStatus" class="status-box">Checking connection to Python server...</div>
+
+        <label>1. Select Model</label>
+        <select id="port" style="width:100%; padding:10px; background:#222; color:white; border-radius:10px; border:1px solid #444; margin-bottom:15px;">
+            <option value="8000">Food Classification</option>
+            <option value="8001">Image Segmentation</option>
+        </select>
+
+        <label>2. Upload Image</label>
+        <input type="file" id="imageInput" accept="image/*">
+
+        <button onclick="predict()">ANALYZE IMAGE</button>
+
+        <div id="result">
+            <div id="details"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check connection on load
+        async function checkConnection() {
+            const status = document.getElementById('connectionStatus');
+            try {
+                const res = await fetch('http://127.0.0.1:8000/ping');
+                if (res.ok) {
+                    status.innerHTML = "● Backend Online (Port 8000)";
+                    status.className = "status-box success";
+                }
+            } catch (e) {
+                status.innerHTML = "○ Backend Offline - Run 'python model_service/main.py' in terminal";
+                status.className = "status-box error";
+            }
+        }
+        checkConnection();
+        setInterval(checkConnection, 5000);
+
+        async function predict() {
+            const port = document.getElementById('port').value;
+            const fileInput = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('result');
+            const details = document.getElementById('details');
+
+            if (!fileInput.files[0]) return alert("Please select an image!");
+
+            resultDiv.style.display = 'block';
+            details.innerHTML = "Processing...";
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch(`http://127.0.0.1:${port}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (port == "8000") {
+                    details.innerHTML = `<h2 style="color:#ff5722">${data.class_name}</h2>
+                                       <p>Confidence: ${(data.confidence * 100).toFixed(2)}%</p>`;
+                } else {
+                    details.innerHTML = "<h3>Ingredients Found:</h3>";
+                    data.detected_ingredients.forEach(i => {
+                        details.innerHTML += `<div>${i.name}: ${i.percentage}%</div>`;
+                    });
+                }
+            } catch (e) {
+                details.innerHTML = "<p class='error'>Connection Failed. Make sure the terminal shows 'Uvicorn running'.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

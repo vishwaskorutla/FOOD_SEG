@@ -1,0 +1,39 @@
+# Local environments and downloaded SDKs
+/venv/
+/flutter/
+**/.venv/
+**/venv/
+
+# Generated files and IDE state
+**/__pycache__/
+**/*.py[cod]
+**/.idea/
+**/build/
+**/.dart_tool/
+**/.gradle/
+**/*.iml
+**/*.log
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/local.properties
+**/generated_plugin_registrant.*
+**/generated_plugins.cmake
+**/GeneratedPluginRegistrant.*
+**/Flutter/ephemeral/
+**/ios/Pods/
+**/.symlinks/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+**/firebase-debug.log
+**/serviceAccount*.json
+
+# Training data and generated model artifacts
+**/data/
+*.keras
+*.pth
+*.pth.zip
+/image_segmentation/best_deeplabv3plus_mobilenetv2/
