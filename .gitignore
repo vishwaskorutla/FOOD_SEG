@@ -30,10 +30,3 @@
 !.env.example
 **/firebase-debug.log
 **/serviceAccount*.json
-
-# Training data and generated model artifacts
-**/data/
-*.keras
-*.pth
-*.pth.zip
-/image_segmentation/best_deeplabv3plus_mobilenetv2/
